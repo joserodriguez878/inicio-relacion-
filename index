@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestro Tiempo Juntos</title>
+    <!-- Premium Fonts: Great Vibes for title, Montserrat for text/numbers -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Canvas background for floating particles */
+        #particlesCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 750px;
+            width: 90%;
+            margin: 40px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4.5rem;
+            color: #c2185b;
+            margin: 0 0 30px 0;
+            font-weight: normal;
+            text-shadow: 1px 1px 3px rgba(194, 24, 91, 0.2);
+        }
+
+        /* Countdown Timer */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .time-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .number {
+            font-size: 3.5rem;
+            font-weight: 600;
+            /* Gradient text effect */
+            background: linear-gradient(to bottom, #c2185b, #880e4f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #880e4f;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* Separator */
+        .separator {
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #c2185b, transparent);
+            margin: 35px auto;
+            opacity: 0.4;
+        }
+
+        /* Romantic Letter */
+        .letter {
+            text-align: justify;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #4a148c;
+            font-weight: 400;
+        }
+
+        .letter p {
+            margin-bottom: 20px;
+        }
+
+        .letter p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .glass-card { padding: 35px 25px; }
+            h1 { font-size: 3.5rem; }
+            .countdown { gap: 15px; }
+            .number { font-size: 2.8rem; }
+            .time-block { min-width: 60px; }
+            .letter { font-size: 1rem; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particlesCanvas"></canvas>
+
+    <div class="glass-card">
+        <h1>Nuestro Tiempo</h1>
+        
+        <div class="countdown">
+            <div class="time-block">
+                <span class="number" id="days">0</span>
+                <span class="label">Días</span>
+            </div>
+            <div class="time-block">
+                <span class="number" id="hours">00</span>
+                <span class="label">Horas</span>
+            </div>
+            <div class="time-block">
+                <span class="number" id="minutes">00</span>
+                <span class="label">Minutos</span>
+            </div>
+            <div class="time-block">
+                <span class="number" id="seconds">00</span>
+                <span class="label">Segundos</span>
+            </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="letter">
+            <p>Ese día fue cuando tomamos la decisión de hacer oficial lo que nuestros corazones ya sentían desde hacía tiempo. Aunque de alguna manera ya nos sentíamos unidos, fue ese día cuando nos confesamos y aceptamos entregarnos el uno al otro, dejando de escribir historias por separado para comenzar a escribir una juntos.</p>
+            <p>Recuerdo lo emocionado que estaba; tanto, que por un momento pensé que algunas lágrimas se me escaparían. También recuerdo verte a ti igual de emocionada, y eso hizo que aquel instante fuera todavía más especial. Fue un momento lleno de emociones, intenso, sincero y, sobre todo, inolvidable.</p>
+            <p>Quiero que nunca olvides ese día, ni lo que sentimos al elegirnos. Que, sin importar cuánto tiempo pase, siempre recordemos el amor que nos tenemos y la ilusión con la que decidimos comenzar esta historia juntos. Porque aquel día no fue simplemente el inicio de una relación, fue el comienzo de una historia que quiero seguir escribiendo contigo.</p>
+        </div>
+    </div>
+
+    <script>
+        // === COUNTDOWN LOGIC ===
+        const startDate = new Date('2026-08-20T09:51:00').getTime();
+
+        function updateCounter() {
+            const now = new Date().getTime();
+            // Using Math.abs as requested so it counts down/up correctly if the date is in the future
+            const difference = Math.abs(now - startDate);
+            
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').innerText = days;
+            document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+        }
+
+        setInterval(updateCounter, 1000);
+        updateCounter();
+
+        // === CANVAS PARTICLES ANIMATION ===
+        const canvas = document.getElementById('particlesCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function initCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            particles = [];
+            // Create particles
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2.5 + 0.5; // Soft sizes
+                this.speedY = Math.random() * 0.8 + 0.2; // Gentle upward speed
+                this.alpha = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.y -= this.speedY;
+                // Reset at the bottom with a new random X when they float off top
+                if (this.y < -10) {
+                    this.y = height + 10;
+                    this.x = Math.random() * width;
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#ffffff';
+                ctx.fill();
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+
+        // Handle resizing
+        window.addEventListener('resize', () => {
+            // Re-init on resize
+            initCanvas();
+        });
+
+        // Start animation
+        initCanvas();
+        animateCanvas();
+    </script>
+</body>
+</html>
